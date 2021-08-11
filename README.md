@@ -48,7 +48,33 @@ Good Luck and happy coding!
 # Solution
 Implemented below cases 
 
-1. As a User I want to be able to see what time slots are free - Done
-2. As a User I want to be able to cancel a reservation - Done
-3. As a User I want to be able to reschedule a reservation - Done
-4. As a Tennis Court Admin, I want to be able to Create/Update/Delete/Find by id/Find by name/List all the guests - Done
+1. As a User I want to be able to see what time slots are free
+2. As a User I want to be able to cancel a reservation
+3. As a User I want to be able to reschedule a reservation 
+4. As a Tennis Court Admin, I want to be able to Create/Update/Delete/Find by id/Find by name/List all the guests
+5. Implement all the missing Restful swagger statements and the API paths to the controllers
+6. Check why rescheduleReservation in the class ReservationService.java is not working correctly and fix it
+
+```curl
+curl -X POST "http://localhost:8080/guests" -H "Content-Type: application/json" -d '{"name":"Anurag"}' -H "user: admin"
+
+curl -X GET "http://localhost:8080/guests/3" -H "Content-Type: application/json" -H "user: admin"
+
+curl -X PUT "http://localhost:8080/guests/3" -H "Content-Type: application/json" -d '{"name":"arg"}' -H "user: admin"
+
+curl -X DELETE "http://localhost:8080/guests/3" -H "Content-Type: application/json" -H "user: admin"
+
+curl -X GET "http://localhost:8080/guests" -H "Content-Type: application/json" -H "user: admin"
+
+curl -X GET "http://localhost:8080/guests?name=arg" -H "Content-Type: application/json" -H "user: admin"
+```
+
+# Run App
+```gradle
+./gradlew bootRun
+```
+
+# Run Test
+```gradle
+./gradlew clean test --info
+```

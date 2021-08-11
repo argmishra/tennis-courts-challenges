@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +20,7 @@ public class GuestService {
   private final GuestMapper guestMapper;
 
   public GuestDTO createGuest(GuestDTO guestDTO) {
-    this.findByName(guestDTO.getName());
+    findByName(guestDTO.getName());
     return guestMapper.map(guestRepository.saveAndFlush(guestMapper.map(guestDTO)));
   }
 
@@ -28,7 +29,6 @@ public class GuestService {
     dto.setName(guestDTO.getName());
     return guestMapper.map(guestRepository.save(guestMapper.map(dto)));
   }
-
 
   public GuestDTO findGuest(Long id) {
     return guestRepository.findById(id).map(guestMapper::map).orElseThrow(() -> {
@@ -52,10 +52,11 @@ public class GuestService {
 
   }
 
-  private Guest findByName(String name) {
-     return guestRepository.findByName(name).orElseThrow(() -> {
+  private void findByName(String name) {
+    Optional<Guest>  guest = guestRepository.findByName(name);
+    if(guest.isPresent()){
       throw new AlreadyExistsEntityException("Guest exists.");
-    });
+    }
   }
 
 

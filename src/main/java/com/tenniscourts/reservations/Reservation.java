@@ -12,9 +12,12 @@ import lombok.Setter;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -30,8 +33,8 @@ import java.math.BigDecimal;
 @Builder
 public class Reservation extends BaseEntity<Long> {
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "guest_id", referencedColumnName = "id")
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "guest_id", nullable = false)
     private Guest guest;
 
     @ManyToOne

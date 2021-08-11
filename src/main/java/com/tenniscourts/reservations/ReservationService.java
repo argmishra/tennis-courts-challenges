@@ -20,7 +20,7 @@ public class ReservationService {
     private final ReservationMapper reservationMapper;
 
     public ReservationDTO bookReservation(CreateReservationRequestDTO createReservationRequestDTO) {
-        throw new IllegalArgumentException();
+        return reservationMapper.map(reservationRepository.saveAndFlush(reservationMapper.map(createReservationRequestDTO)));
     }
 
     public ReservationDTO findReservation(Long reservationId) {
@@ -40,6 +40,28 @@ public class ReservationService {
 
             BigDecimal refundValue = getRefundValue(reservation);
             return this.updateReservation(reservation, refundValue, ReservationStatus.CANCELLED);
+
+        }).orElseThrow(() -> {
+            throw new EntityNotFoundException("Reservation not found.");
+        });
+    }
+
+    private Reservation reschedule(Long reservationId, Long scheduleId) {
+        return reservationRepository.findById(reservationId).map(reservation -> {
+
+            if(! scheduleId.equals(reservation.getSchedule().getId())) {
+                this.validateCancellation(reservation);
+                BigDecimal refundValue = getRefundValue(reservation);
+                Reservation updateReservation = this.updateReservation(reservation, refundValue, ReservationStatus.CANCELLED);
+                ReservationDTO newReservation = bookReservation(CreateReservationRequestDTO.builder()
+                    .guestId(updateReservation.getGuest().getId())
+                    .scheduleId(scheduleId)
+                    .build());
+                newReservation.setPreviousReservation(reservationMapper.map(updateReservation));
+                return reservationMapper.map(newReservation);
+            }
+
+          return reservation;
 
         }).orElseThrow(() -> {
             throw new EntityNotFoundException("Reservation not found.");
@@ -76,25 +98,7 @@ public class ReservationService {
 
 
     public ReservationDTO rescheduleReservation(Long previousReservationId, Long scheduleId) {
-        Reservation previousReservation = cancel(previousReservationId);
-        ReservationDTO newReservation = null;
-
-        boolean check = scheduleId.equals(previousReservation.getSchedule().getId());
-        ReservationStatus status = check ? ReservationStatus.READY_TO_PLAY :ReservationStatus.RESCHEDULED;
-        previousReservation.setReservationStatus(status);
-
-        if (!check) {
-            newReservation = bookReservation(CreateReservationRequestDTO.builder()
-                .guestId(previousReservation.getGuest().getId())
-                .scheduleId(scheduleId)
-                .build());
-            newReservation.setPreviousReservation(reservationMapper.map(previousReservation));
-        } else {
-            newReservation = reservationMapper.map(previousReservation);
-        }
-
-        reservationRepository.save(previousReservation);
-
-        return newReservation;
+        Reservation previousReservation = reschedule(previousReservationId, scheduleId);
+        return reservationMapper.map(previousReservation);
     }
 }
